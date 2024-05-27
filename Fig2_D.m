@@ -38,10 +38,7 @@ end
 LAP = inv(Exc');
 
 x = LAP.Y;
-xs = -x;
-
-x = normalize(x,'range');
-xs = normalize(xs,'range');
+xs = x(end:-1:1);
 
 a = LAP.qP.P{1}.a;
 b = LAP.qP.P{1}.b;
