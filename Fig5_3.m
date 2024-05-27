@@ -118,7 +118,7 @@ for ii = 1:numel(files)
             temp = LAP{jj};
 
             x = temp.Y;
-            xs = -x;
+            xs = x(end:-1:1);
 
             a = temp.qP.P{1}.a;
             b = temp.qP.P{1}.b;
