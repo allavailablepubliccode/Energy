@@ -61,48 +61,50 @@ end
 
 function LAP = inv(Y)
 
-% model states (where hidden states comprise phase differences)
-%--------------------------------------------------------------------------
-x.x         = 0;                      % amplitude
+        % model states (initial conditions)
+        %--------------------------------------------------------------------------
+        x.x         = 0;                      % amplitude
 
-% model parameters
-%--------------------------------------------------------------------------
-P.a         = 0;
-P.b         = 0;
+        % model parameters (prior means)
+        %--------------------------------------------------------------------------
+        P.a         = 0;        % internal coupling
+        P.b         = 0;        % external coupling
+        P.s         = 0;        % scaling
 
-% prior variance
-%--------------------------------------------------------------------------
-pC.a         = 1;
-pC.b         = 1;
+        % prior variance
+        %--------------------------------------------------------------------------
+        pC.a         = 1;
+        pC.b         = 1;
+        pC.s         = 1;
 
-% observation function (to generate timeseries)
-%--------------------------------------------------------------------------
-g           = @(x,v,P) x.x;
+        % observation function (to generate timeseries)
+        %--------------------------------------------------------------------------
+        g           = @(x,v,P) P.s*x.x;
 
-% equations of motion (simplified coupled oscillator model)
-%--------------------------------------------------------------------------
-f           = @(x,v,P) P.a*x.x + P.b*v;
+        % equation of motion (control theory LTI)
+        %--------------------------------------------------------------------------
+        f           = @(x,v,P) P.a*x.x + P.b*v;
 
-% first level state space model
-%--------------------------------------------------------------------------
-DEM.M(1).x      = x;                             % initial states
-DEM.M(1).f      = f;                             % equations of motionDEM.
-DEM.M(1).g      = g;                             % observation mapping
-DEM.M(1).pE     = P;                             % model parameters
-DEM.M(1).pC     = diag(spm_vec(pC));
-DEM.M(1).V      = exp(16);                       % precision of observation noise
-DEM.M(1).W      = exp(16);                       % precision of state noise
+        % first level state space model
+        %--------------------------------------------------------------------------
+        DEM.M(1).x      = x;                             % initial states
+        DEM.M(1).f      = f;                             % equations of motionDEM.
+        DEM.M(1).g      = g;                             % observation mapping
+        DEM.M(1).pE     = P;                             % model parameters
+        DEM.M(1).pC     = diag(spm_vec(pC));
+        DEM.M(1).V      = exp(16);                       % precision of observation noise
+        DEM.M(1).W      = exp(16);                       % precision of state noise
 
-% second level  causes or exogenous forcing term
-%--------------------------------------------------------------------------
-DEM.M(2).v      = 0;                             % initial causes
-DEM.M(2).V      = exp(16);                       % precision of exogenous causes
+        % second level  causes or exogenous forcing term
+        %--------------------------------------------------------------------------
+        DEM.M(2).v      = 0;                             % initial causes
+        DEM.M(2).V      = exp(16);                       % precision of exogenous causes
 
-% create data with known parameters (P)
-%==========================================================================
-DEM.U = (rand(size(Y'))-0.5)/16;
-DEM.Y = Y';
+        % create data with known parameters (P)
+        %==========================================================================
+        DEM.U = (rand(size(Y'))-0.5)/16;        % randomized driving input
+        DEM.Y = Y';
 
-LAP   = spm_LAP(DEM);
+        LAP   = spm_LAP(DEM);
 
 end
